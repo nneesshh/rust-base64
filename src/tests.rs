@@ -19,12 +19,12 @@ use crate::{
 #[test]
 fn roundtrip_random_config_short() {
     // exercise the slower encode/decode routines that operate on shorter buffers more vigorously
-    roundtrip_random_config(Uniform::new(0, 50), 10_000);
+    roundtrip_random_config(Uniform::new(0, 50).unwrap(), 10_000);
 }
 
 #[test]
 fn roundtrip_random_config_long() {
-    roundtrip_random_config(Uniform::new(0, 1000), 10_000);
+    roundtrip_random_config(Uniform::new(0, 1000).unwrap(), 10_000);
 }
 
 pub fn assert_encode_sanity(encoded: &str, padded: bool, input_len: usize) {

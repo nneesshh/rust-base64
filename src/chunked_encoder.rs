@@ -127,7 +127,7 @@ pub mod tests {
             input_buf.clear();
             output_buf.clear();
 
-            let buf_len = input_len_range.sample(&mut rng);
+            let buf_len = input_len_range.unwrap().sample(&mut rng);
             for _ in 0..buf_len {
                 input_buf.push(rng.gen());
             }

@@ -146,7 +146,7 @@ fn roundtrip_random<E: EngineWrapper>(engine_wrapper: E) {
             &mut orig_data,
             &mut encode_buf,
             &mut rng,
-            &len_range,
+            &len_range.unwrap(),
         );
 
         // exactly the right size
@@ -179,7 +179,7 @@ fn encode_doesnt_write_extra_bytes<E: EngineWrapper>(engine_wrapper: E) {
         encode_buf.clear();
         encode_buf_backup.clear();
 
-        let orig_len = fill_rand(&mut orig_data, &mut rng, &input_len_range);
+        let orig_len = fill_rand(&mut orig_data, &mut rng, &input_len_range.unwrap());
 
         let prefix_len = 1024;
         // plenty of prefix and suffix
@@ -241,7 +241,7 @@ fn encode_engine_slice_fits_into_precisely_sized_slice<E: EngineWrapper>(engine_
         encoded_data.clear();
         decoded.clear();
 
-        let input_len = input_len_range.sample(&mut rng);
+        let input_len = input_len_range.unwrap().sample(&mut rng);
 
         for _ in 0..input_len {
             orig_data.push(rng.gen());
@@ -294,7 +294,7 @@ where
         decode_buf.clear();
         decode_buf_backup.clear();
 
-        let orig_len = fill_rand(&mut orig_data, &mut rng, &len_range);
+        let orig_len = fill_rand(&mut orig_data, &mut rng, &len_range.unwrap());
         encode_buf.resize(orig_len * 2 + 100, 0);
 
         let encoded_len = engine
@@ -580,7 +580,7 @@ fn decode_invalid_byte_error<E: EngineWrapper>(engine_wrapper: E) {
                 &mut orig_data,
                 &mut encode_buf,
                 &mut rng,
-                &len_range,
+                &len_range.unwrap(),
             );
 
         // exactly the right size
@@ -598,7 +598,7 @@ fn decode_invalid_byte_error<E: EngineWrapper>(engine_wrapper: E) {
         };
 
         let invalid_range = distributions::Uniform::new(0, orig_len);
-        let invalid_index = invalid_range.sample(&mut rng);
+        let invalid_index = invalid_range.unwrap().sample(&mut rng);
         encode_buf[invalid_index] = invalid_byte;
 
         assert_eq!(
@@ -625,7 +625,7 @@ fn decode_padding_before_final_non_padding_char_error_invalid_byte<E: EngineWrap
     // the different amounts of proper padding, w/ offset from end for the last non-padding char
     let suffixes = [("/w==", 2), ("iYu=", 1), ("zzzz", 0)];
 
-    let prefix_quads_range = distributions::Uniform::from(0..=256);
+    let prefix_quads_range = distributions::Uniform::new_inclusive(0, 256);
 
     for mode in all_pad_modes() {
         // we don't encode so we don't care about encode padding
@@ -633,7 +633,7 @@ fn decode_padding_before_final_non_padding_char_error_invalid_byte<E: EngineWrap
 
         for _ in 0..100_000 {
             for (suffix, offset) in suffixes.iter() {
-                let mut s = "ABCD".repeat(prefix_quads_range.sample(&mut rng));
+                let mut s = "ABCD".repeat(prefix_quads_range.unwrap().sample(&mut rng));
                 s.push_str(suffix);
                 let mut encoded = s.into_bytes();
 
@@ -673,16 +673,16 @@ fn decode_padding_starts_before_final_chunk_error_invalid_byte<E: EngineWrapper>
     let mut rng = seeded_rng();
 
     // must have at least one prefix quad
-    let prefix_quads_range = distributions::Uniform::from(1..256);
+    let prefix_quads_range = distributions::Uniform::new(1, 256);
     // excluding 1 since we don't care about invalid length in this test
-    let suffix_pad_len_range = distributions::Uniform::from(2..=4);
+    let suffix_pad_len_range = distributions::Uniform::new_inclusive(2, 4);
     for mode in all_pad_modes() {
         // we don't encode so we don't care about encode padding
         let engine = E::standard_with_pad_mode(true, mode);
         for _ in 0..100_000 {
-            let suffix_len = suffix_pad_len_range.sample(&mut rng);
+            let suffix_len = suffix_pad_len_range.unwrap().sample(&mut rng);
             let mut encoded = "ABCD"
-                .repeat(prefix_quads_range.sample(&mut rng))
+                .repeat(prefix_quads_range.unwrap().sample(&mut rng))
                 .into_bytes();
             encoded.resize(encoded.len() + suffix_len, PAD_BYTE);
 
@@ -717,13 +717,13 @@ fn decode_padding_starts_before_final_chunk_error_invalid_length<E: EngineWrappe
     let mut rng = seeded_rng();
 
     // must have at least one prefix quad
-    let prefix_quads_range = distributions::Uniform::from(1..256);
+    let prefix_quads_range = distributions::Uniform::new(1, 256);
     for mode in all_pad_modes() {
         // we don't encode so we don't care about encode padding
         let engine = E::standard_with_pad_mode(true, mode);
         for _ in 0..100_000 {
             let mut encoded = "ABCD"
-                .repeat(prefix_quads_range.sample(&mut rng))
+                .repeat(prefix_quads_range.unwrap().sample(&mut rng))
                 .into_bytes();
             encoded.resize(encoded.len() + 1, PAD_BYTE);
 
@@ -747,14 +747,14 @@ fn decode_too_little_data_before_padding_error_invalid_byte<E: EngineWrapper>(en
     let mut rng = seeded_rng();
 
     // want to test no prefix quad case, so start at 0
-    let prefix_quads_range = distributions::Uniform::from(0_usize..256);
-    let suffix_data_len_range = distributions::Uniform::from(0_usize..=1);
+    let prefix_quads_range = distributions::Uniform::new(0_usize, 256_usize);
+    let suffix_data_len_range = distributions::Uniform::new_inclusive(0_usize, 1_usize);
     for mode in all_pad_modes() {
         // we don't encode so we don't care about encode padding
         let engine = E::standard_with_pad_mode(true, mode);
         for _ in 0..100_000 {
-            let suffix_data_len = suffix_data_len_range.sample(&mut rng);
-            let prefix_quad_len = prefix_quads_range.sample(&mut rng);
+            let suffix_data_len = suffix_data_len_range.unwrap().sample(&mut rng);
+            let prefix_quad_len = prefix_quads_range.unwrap().sample(&mut rng);
 
             // ensure there is a suffix quad
             let min_padding = usize::from(suffix_data_len == 0);
@@ -1237,7 +1237,7 @@ fn decode_into_slice_fits_in_precisely_sized_slice<E: EngineWrapper>(engine_wrap
         encoded_data.clear();
         decode_buf.clear();
 
-        let input_len = input_len_range.sample(&mut rng);
+        let input_len = input_len_range.unwrap().sample(&mut rng);
 
         for _ in 0..input_len {
             orig_data.push(rng.gen());

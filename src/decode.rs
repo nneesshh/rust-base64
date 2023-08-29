@@ -183,7 +183,7 @@ mod tests {
             decoded_without_prefix.clear();
             prefix.clear();
 
-            let input_len = input_len_range.sample(&mut rng);
+            let input_len = input_len_range.unwrap().sample(&mut rng);
 
             for _ in 0..input_len {
                 orig_data.push(rng.gen());
@@ -193,7 +193,7 @@ mod tests {
             engine.encode_string(&orig_data, &mut encoded_data);
             assert_encode_sanity(&encoded_data, engine.config().encode_padding(), input_len);
 
-            let prefix_len = prefix_len_range.sample(&mut rng);
+            let prefix_len = prefix_len_range.unwrap().sample(&mut rng);
 
             // fill the buf with a prefix
             for _ in 0..prefix_len {
@@ -301,7 +301,7 @@ mod tests {
             decode_buf.clear();
             decode_buf_copy.clear();
 
-            let input_len = input_len_range.sample(&mut rng);
+            let input_len = input_len_range.unwrap().sample(&mut rng);
 
             for _ in 0..input_len {
                 orig_data.push(rng.gen());

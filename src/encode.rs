@@ -243,13 +243,13 @@ mod tests {
             encoded_data_with_prefix.clear();
             decoded.clear();
 
-            let input_len = input_len_range.sample(&mut rng);
+            let input_len = input_len_range.unwrap().sample(&mut rng);
 
             for _ in 0..input_len {
                 orig_data.push(rng.gen());
             }
 
-            let prefix_len = prefix_len_range.sample(&mut rng);
+            let prefix_len = prefix_len_range.unwrap().sample(&mut rng);
             for _ in 0..prefix_len {
                 // getting convenient random single-byte printable chars that aren't base64 is
                 // annoying
@@ -305,7 +305,7 @@ mod tests {
             encoded_data_original_state.clear();
             decoded.clear();
 
-            let input_len = input_len_range.sample(&mut rng);
+            let input_len = input_len_range.unwrap().sample(&mut rng);
 
             for _ in 0..input_len {
                 orig_data.push(rng.gen());
@@ -358,7 +358,7 @@ mod tests {
             input.clear();
             output.clear();
 
-            let input_len = input_len_range.sample(&mut rng);
+            let input_len = input_len_range.unwrap().sample(&mut rng);
 
             for _ in 0..input_len {
                 input.push(rng.gen());
@@ -398,7 +398,7 @@ mod tests {
             input.clear();
             output.clear();
 
-            let input_len = input_len_range.sample(&mut rng);
+            let input_len = input_len_range.unwrap().sample(&mut rng);
 
             for _ in 0..input_len {
                 input.push(rng.gen());
